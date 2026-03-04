@@ -1,0 +1,14 @@
+{
+  "descricao": "Feriados nacionais fixos - Lei 662/1949, Lei 6.802/1980, Lei 14.759/2023",
+  "feriados": [
+    { "mes": 1, "dia": 1, "nome": "Confraternização Universal", "fundamentacao": "Lei nº 662/1949" },
+    { "mes": 4, "dia": 21, "nome": "Tiradentes", "fundamentacao": "Lei nº 662/1949" },
+    { "mes": 5, "dia": 1, "nome": "Dia do Trabalho", "fundamentacao": "Lei nº 662/1949" },
+    { "mes": 9, "dia": 7, "nome": "Independência do Brasil", "fundamentacao": "Lei nº 662/1949" },
+    { "mes": 10, "dia": 12, "nome": "Nossa Senhora Aparecida", "fundamentacao": "Lei nº 6.802/1980" },
+    { "mes": 11, "dia": 2, "nome": "Finados", "fundamentacao": "Lei nº 662/1949" },
+    { "mes": 11, "dia": 15, "nome": "Proclamação da República", "fundamentacao": "Lei nº 662/1949" },
+    { "mes": 11, "dia": 20, "nome": "Consciência Negra", "fundamentacao": "Lei nº 14.759/2023" },
+    { "mes": 12, "dia": 25, "nome": "Natal", "fundamentacao": "Lei nº 662/1949" }
+  ]
+}

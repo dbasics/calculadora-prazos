@@ -1,0 +1,410 @@
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface-hover: #22253a;
+  --border: #2a2d3e;
+  --text: #e4e4e7;
+  --text-muted: #8b8d9e;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --radius: 8px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* === LAYOUT === */
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+header .subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* === TABS === */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.tab {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* === FORM === */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full { grid-column: 1 / -1; }
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.form-group .help {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+input, select, textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: var(--font);
+  transition: border-color 0.15s;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+textarea { resize: vertical; min-height: 60px; }
+
+/* === BUTTONS === */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover { background: var(--surface-hover); }
+
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+}
+
+.btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
+
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* === RESULTADO === */
+.resultado-container { display: none; }
+.resultado-container.visible { display: block; }
+
+.resultado-destaque {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.resultado-destaque .data-vencimento {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--mono);
+}
+
+.resultado-destaque .dia-semana {
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.resultado-destaque .dias-contados {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* === ETAPAS === */
+.etapas {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.etapas h3 {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.etapa {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+
+.etapa:last-child { border-bottom: none; }
+.etapa .etapa-nome { color: var(--text-muted); }
+.etapa .etapa-data { font-family: var(--mono); font-size: 12px; }
+
+/* === PARÂMETROS === */
+.parametros {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.parametros h3 {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.param-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.param-row .param-key { color: var(--text-muted); }
+.param-row .param-value { font-family: var(--mono); font-size: 12px; }
+
+/* === CALENDÁRIO === */
+.calendario {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.calendario h3 {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cal-dia {
+  display: grid;
+  grid-template-columns: 100px 50px 1fr;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+.cal-dia:last-child { border-bottom: none; }
+
+.cal-data {
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.cal-status {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.cal-status.contado {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--green);
+}
+
+.cal-status.nao_contado {
+  background: rgba(139, 141, 158, 0.15);
+  color: var(--text-muted);
+}
+
+.cal-status.prorrogado {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--yellow);
+}
+
+.cal-motivo {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* === CONFIGURAÇÃO === */
+.config-section {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.config-section h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.feriado-lista {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.feriado-item {
+  display: grid;
+  grid-template-columns: 100px 1fr 120px;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+.feriado-item:last-child { border-bottom: none; }
+
+.feriado-data { font-family: var(--mono); font-size: 11px; }
+.feriado-tipo {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent);
+}
+
+.suspensao-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.suspensao-form .full { grid-column: 1 / -1; }
+
+/* === HISTÓRICO === */
+.historico-item {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.historico-item:hover { background: var(--surface-hover); }
+
+.historico-info { font-size: 13px; }
+.historico-info .data { font-family: var(--mono); font-weight: 600; color: var(--accent); }
+.historico-info .desc { color: var(--text-muted); font-size: 12px; }
+.historico-info .timestamp { color: var(--text-muted); font-size: 11px; }
+
+.historico-vazio {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* === PRINT === */
+@media print {
+  body { background: white; color: black; }
+  .tabs, .btn, header, .form-grid { display: none; }
+  .resultado-container { display: block !important; }
+  .resultado-destaque { border-color: black; }
+  .resultado-destaque .data-vencimento { color: black; }
+  .cal-dia { border-bottom-color: #ddd; }
+  .cal-status.contado { background: #e8f5e9; color: #2e7d32; }
+  .cal-status.nao_contado { background: #f5f5f5; color: #666; }
+  .cal-status.prorrogado { background: #fff3e0; color: #e65100; }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .cal-dia { grid-template-columns: 80px 45px 1fr; font-size: 11px; }
+  .feriado-item { grid-template-columns: 80px 1fr; }
+  .feriado-item .feriado-tipo { display: none; }
+  .resultado-destaque .data-vencimento { font-size: 24px; }
+}

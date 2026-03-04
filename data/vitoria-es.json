@@ -1,0 +1,8 @@
+{
+  "municipio": "vitoria-es",
+  "nome": "Vitória/ES",
+  "fundamentacao_geral": "Lei Municipal nº 1.732/1967",
+  "feriados": [
+    { "mes": 9, "dia": 8, "nome": "Nossa Senhora da Vitória (padroeira)", "fundamentacao": "Lei Municipal nº 1.732/1967, art. 1º", "recorrente": true }
+  ]
+}

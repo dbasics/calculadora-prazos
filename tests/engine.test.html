@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Testes - Motor de Cálculo de Prazos</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #e0e0e0; }
+    h1 { color: #00d4ff; }
+    .pass { color: #00ff88; }
+    .fail { color: #ff4444; font-weight: bold; }
+    .summary { margin-top: 20px; padding: 10px; border: 1px solid #333; }
+    .test-case { margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <h1>Testes do Motor de Cálculo</h1>
+  <div id="results"></div>
+  <div id="summary" class="summary"></div>
+
+  <script src="../js/easter.js"></script>
+  <script src="../js/holidays.js"></script>
+  <script src="../js/engine.js"></script>
+  <script>
+    let passed = 0;
+    let failed = 0;
+    const results = document.getElementById('results');
+
+    function assert(testName, expected, actual) {
+      const ok = expected === actual;
+      if (ok) {
+        passed++;
+        results.innerHTML += `<div class="test-case pass">OK  ${testName}</div>`;
+      } else {
+        failed++;
+        results.innerHTML += `<div class="test-case fail">FALHOU  ${testName} | Esperado: ${expected} | Obtido: ${actual}</div>`;
+      }
+    }
+
+    async function runTests() {
+      await HolidayManager.init();
+
+      // === CASO 1: Prazo direto 03/03/2026, 15 dias úteis → 24/03/2026 ===
+      const caso1 = calcularPrazo({
+        tipoData: 'prazo_direto',
+        dataEntrada: '2026-03-03',
+        diasPrazo: 15,
+        tipoContagem: 'dias_uteis',
+        tribunal: 'tjes',
+        municipio: 'vitoria-es',
+        multiplicador: 1,
+      });
+      assert('Caso 1: Prazo direto 03/03, 15d úteis → 24/03/2026', '2026-03-24', caso1.dataVencimento);
+
+      // === CASO 2: Disponibilização DJEN 03/03/2026, 15 dias úteis → 25/03/2026 ===
+      const caso2 = calcularPrazo({
+        tipoData: 'disponibilizacao_djen',
+        dataEntrada: '2026-03-03',
+        diasPrazo: 15,
+        tipoContagem: 'dias_uteis',
+        tribunal: 'tjes',
+        municipio: 'vitoria-es',
+        multiplicador: 1,
+      });
+      assert('Caso 2: DJEN disponibilização 03/03, 15d úteis → 25/03/2026', '2026-03-25', caso2.dataVencimento);
+
+      // === CASO 3: Recesso de fim de ano (prazo cruza 20/12-20/01) ===
+      const caso3 = calcularPrazo({
+        tipoData: 'prazo_direto',
+        dataEntrada: '2026-12-18',
+        diasPrazo: 5,
+        tipoContagem: 'dias_uteis',
+        tribunal: 'tjes',
+        municipio: 'vitoria-es',
+        multiplicador: 1,
+      });
+      // 18/12 = evento. Dia 1 = 19/12 (sexta, útil).
+      // 20/12 em diante = recesso até 20/01.
+      // 21/01 = quarta → dia 2. 22/01 = qui → dia 3. 23/01 = sex → dia 4. 26/01 = seg → dia 5.
+      assert('Caso 3: Recesso fim de ano - 18/12, 5d úteis → 26/01/2027', '2027-01-26', caso3.dataVencimento);
+
+      // === CASO 4: Carnaval 2026 (seg 16/02, ter 17/02) ===
+      const caso4 = calcularPrazo({
+        tipoData: 'prazo_direto',
+        dataEntrada: '2026-02-13',
+        diasPrazo: 5,
+        tipoContagem: 'dias_uteis',
+        tribunal: 'tjes',
+        municipio: 'vitoria-es',
+        multiplicador: 1,
+      });
+      // 13/02 = sexta (evento). Dia 1 = próximo útil após 14/02.
+      // 14/02 = sábado, 15/02 = domingo, 16/02 = Carnaval seg, 17/02 = Carnaval ter, 18/02 = Quarta de Cinzas
+      // Dia 1 = 19/02 (quinta). Dia 2 = 20/02 (sexta). Dia 3 = 23/02 (segunda). Dia 4 = 24/02 (terça). Dia 5 = 25/02 (quarta).
+      assert('Caso 4: Carnaval 2026 - 13/02, 5d úteis → 25/02/2026', '2026-02-25', caso4.dataVencimento);
+
+      // === CASO 5: Sexta-Feira Santa 2026 (03/04) ===
+      const caso5 = calcularPrazo({
+        tipoData: 'prazo_direto',
+        dataEntrada: '2026-04-01',
+        diasPrazo: 3,
+        tipoContagem: 'dias_uteis',
+        tribunal: 'tjes',
+        municipio: 'vitoria-es',
+        multiplicador: 1,
+      });
+      // 01/04 = quarta (evento). Dia 1 = 02/04... mas 02/04 = Quinta-Feira Santa (TJES).
+      // 03/04 = Sexta-Feira Santa. 04-05/04 = fim de semana.
+      // Dia 1 = 06/04 (segunda). Dia 2 = 07/04 (terça). Dia 3 = 08/04 (quarta).
+      assert('Caso 5: Semana Santa TJES - 01/04, 3d úteis → 08/04/2026', '2026-04-08', caso5.dataVencimento);
+
+      // === CASO 6: Corpus Christi 2026 (04/06 + 05/06 ponto facultativo) ===
+      const caso6 = calcularPrazo({
+        tipoData: 'prazo_direto',
+        dataEntrada: '2026-06-03',
+        diasPrazo: 3,
+        tipoContagem: 'dias_uteis',
+        tribunal: 'tjes',
+        municipio: 'vitoria-es',
+        multiplicador: 1,
+      });
+      // 03/06 = quarta (evento). 04/06 = Corpus Christi (PF). 05/06 = PF.
+      // 06-07/06 = fim de semana.
+      // Dia 1 = 08/06 (segunda). Dia 2 = 09/06. Dia 3 = 10/06.
+      assert('Caso 6: Corpus Christi TJES - 03/06, 3d úteis → 10/06/2026', '2026-06-10', caso6.dataVencimento);
+
+      // === CASO 7: Quarta de Cinzas dia inteiro no TJES ===
+      // Já verificado no caso 4, mas testamos diretamente
+      const verificacaoCinzas = HolidayManager.verificarDia('2026-02-18', 'tjes', 'vitoria-es');
+      assert('Caso 7: Quarta de Cinzas 2026 não é dia útil no TJES', false, verificacaoCinzas.util);
+
+      // === CASO 8: Quinta-Feira Santa TJES ===
+      const verificacaoQuinta = HolidayManager.verificarDia('2026-04-02', 'tjes', 'vitoria-es');
+      assert('Caso 8: Quinta-Feira Santa 2026 não é dia útil no TJES', false, verificacaoQuinta.util);
+
+      // === CASO 9: Nossa Senhora da Penha (13/04/2026) ===
+      const verificacaoPenha = HolidayManager.verificarDia('2026-04-13', 'tjes', 'vitoria-es');
+      assert('Caso 9: N.S. da Penha 13/04/2026 não é dia útil no TJES', false, verificacaoPenha.util);
+
+      // === CASO 10: Nossa Senhora da Vitória (08/09/2026 - municipal) ===
+      const verificacaoVitoria = HolidayManager.verificarDia('2026-09-08', 'tjes', 'vitoria-es');
+      assert('Caso 10: N.S. da Vitória 08/09/2026 não é dia útil em Vitória/ES', false, verificacaoVitoria.util);
+
+      // === CASO 11: Suspensão meio período = dia inteiro ===
+      // Simulamos adicionando uma suspensão customizada
+      HolidayManager._suspensoesCustom.push({
+        inicio: '2026-05-15',
+        fim: '2026-05-15',
+        descricao: 'Suspensão meio período (teste)',
+        fundamentacao: 'Portaria teste',
+        ativo: true,
+      });
+      const verificacaoSusp = HolidayManager.verificarDia('2026-05-15', 'tjes', 'vitoria-es');
+      assert('Caso 11: Suspensão meio período = dia inteiro (não útil)', false, verificacaoSusp.util);
+      HolidayManager._suspensoesCustom.pop(); // limpar
+
+      // === CASO 12: Prazo em meses ===
+      const caso12 = calcularPrazo({
+        tipoData: 'prazo_direto',
+        dataEntrada: '2026-01-30',
+        diasPrazo: 1,
+        tipoContagem: 'meses',
+        tribunal: 'tjes',
+        municipio: 'vitoria-es',
+        multiplicador: 1,
+      });
+      // 30/01 + 1 mês = 28/02 (fev não tem 30). Marco = 21/01 (próximo útil após 20/01 recesso).
+      // 21/01 + 1 mês = 21/02. 21/02 é sábado? Vamos ver: 2026-02-21 = sábado.
+      // Prorrogação → 23/02 (segunda).
+      // Espera: marco = próximo útil após 31/01. 31/01 é sábado → 02/02 (segunda).
+      // 02/02 + 1 mês = 02/03 (segunda, útil).
+      assert('Caso 12: Prazo 1 mês a partir de 30/01/2026', '2026-03-02', caso12.dataVencimento);
+
+      // === CASO 13: Multiplicador 2x (Fazenda Pública) ===
+      const caso13 = calcularPrazo({
+        tipoData: 'prazo_direto',
+        dataEntrada: '2026-03-03',
+        diasPrazo: 15,
+        tipoContagem: 'dias_uteis',
+        tribunal: 'tjes',
+        municipio: 'vitoria-es',
+        multiplicador: 2,
+      });
+      // 15 × 2 = 30 dias úteis a partir de 04/03
+      assert('Caso 13: Multiplicador 2x - 03/03, 15d×2 = 30d úteis', true, caso13.dataVencimento > '2026-04-01');
+
+      // === CASO 14: Dia do Advogado (11/08/2026) ===
+      const verificacaoAdvogado = HolidayManager.verificarDia('2026-08-11', 'tjes', 'vitoria-es');
+      assert('Caso 14: Dia do Advogado 11/08/2026 não é dia útil no TJES', false, verificacaoAdvogado.util);
+
+      // === CASO 15: Pontos facultativos Corpus Christi ===
+      const verif04 = HolidayManager.verificarDia('2026-06-04', 'tjes', 'vitoria-es');
+      const verif05 = HolidayManager.verificarDia('2026-06-05', 'tjes', 'vitoria-es');
+      assert('Caso 15a: Corpus Christi 04/06 não é dia útil', false, verif04.util);
+      assert('Caso 15b: Ponto facultativo 05/06 não é dia útil', false, verif05.util);
+
+      // === TESTES ADICIONAIS ===
+
+      // Páscoa 2026 calculada corretamente
+      const pascoa2026 = calcularPascoa(2026);
+      assert('Páscoa 2026 = 05/04/2026', '2026-04-05', formatarData(pascoa2026));
+
+      // Verificar que dia útil normal funciona
+      const verificacaoUtil = HolidayManager.verificarDia('2026-03-04', 'tjes', 'vitoria-es');
+      assert('04/03/2026 (quarta) é dia útil', true, verificacaoUtil.util);
+
+      // Resumo
+      const summary = document.getElementById('summary');
+      const total = passed + failed;
+      summary.innerHTML = `<strong>${passed}/${total} testes passaram</strong>`;
+      summary.className = failed === 0 ? 'summary pass' : 'summary fail';
+    }
+
+    runTests();
+  </script>
+</body>
+</html>

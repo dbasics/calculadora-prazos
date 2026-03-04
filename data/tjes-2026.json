@@ -1,0 +1,38 @@
+{
+  "tribunal": "TJES",
+  "nome": "Tribunal de Justiça do Espírito Santo",
+  "ano": 2026,
+  "fundamentacao_geral": "Ato Normativo TJES nº 319/2025",
+  "notas": [
+    "Quarta-feira de Cinzas é feriado dia inteiro no TJES (LC Estadual 234/2002)",
+    "Pontos facultativos são tratados como dias não úteis",
+    "Recesso forense estadual: 01-06/jan e 20-31/dez (LC Estadual 234/2002, art. 141, 'e')"
+  ],
+  "feriados_estaduais": [
+    { "data": "2026-04-02", "nome": "Quinta-Feira da Semana Santa", "fundamentacao": "LC Estadual nº 234/2002, art. 141, 'a'" },
+    { "data": "2026-04-13", "nome": "Nossa Senhora da Penha", "fundamentacao": "Lei Estadual nº 11.010/2019, art. 1º" },
+    { "data": "2026-04-20", "nome": "Ponto Facultativo", "fundamentacao": "Ato Normativo TJES nº 319/2025" },
+    { "data": "2026-06-04", "nome": "Corpus Christi - Ponto Facultativo", "fundamentacao": "Ato Normativo TJES nº 319/2025, art. 2º" },
+    { "data": "2026-06-05", "nome": "Ponto Facultativo", "fundamentacao": "Ato Normativo TJES nº 319/2025" },
+    { "data": "2026-08-10", "nome": "Ponto Facultativo", "fundamentacao": "Ato Normativo TJES nº 319/2025" },
+    { "data": "2026-08-11", "nome": "Dia do Advogado", "fundamentacao": "LC Estadual nº 234/2002, art. 141, 'd'" },
+    { "data": "2026-10-28", "nome": "Dia do Servidor Público", "fundamentacao": "LC Estadual nº 46/1994, art. 293" },
+    { "data": "2026-12-07", "nome": "Ponto Facultativo", "fundamentacao": "Ato Normativo TJES nº 319/2025" },
+    { "data": "2026-12-08", "nome": "Dia da Justiça", "fundamentacao": "LC Estadual nº 234/2002, art. 141, 'd'" }
+  ],
+  "recessos": [
+    {
+      "inicio": "2026-01-01",
+      "fim": "2026-01-06",
+      "nome": "Recesso Forense de início de ano",
+      "fundamentacao": "LC Estadual nº 234/2002, art. 141, 'e'"
+    },
+    {
+      "inicio": "2026-12-20",
+      "fim": "2026-12-31",
+      "nome": "Recesso Forense de fim de ano",
+      "fundamentacao": "LC Estadual nº 234/2002, art. 141, 'e'"
+    }
+  ],
+  "suspensoes": []
+}
