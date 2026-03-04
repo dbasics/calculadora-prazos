@@ -56,9 +56,9 @@ function initFormEvents() {
   document.getElementById('tipo-data').addEventListener('change', (e) => {
     const help = document.getElementById('tipo-data-help');
     const textos = {
-      disponibilizacao_djen: 'A data sera ajustada conforme as regras do DJEN (2 saltos de dia util)',
-      publicacao_djen: 'O prazo inicia no 1o dia util apos a publicacao (1 salto)',
-      prazo_direto: 'O prazo inicia no 1o dia util apos o evento (exclusao do dia inicial)',
+      disponibilizacao_djen: 'A data será ajustada conforme as regras do DJEN (2 saltos de dia útil)',
+      publicacao_djen: 'O prazo inicia no 1º dia útil após a publicação (1 salto)',
+      prazo_direto: 'O prazo inicia no 1º dia útil após o evento (exclusão do dia inicial)',
     };
     help.textContent = textos[e.target.value];
   });
@@ -70,7 +70,7 @@ function initFormEvents() {
     Storage.salvar(ultimoResultado);
     const btn = document.getElementById('btn-salvar');
     btn.textContent = 'Salvo!';
-    setTimeout(() => { btn.textContent = 'Salvar no historico'; }, 1500);
+    setTimeout(() => { btn.textContent = 'Salvar no histórico'; }, 1500);
   });
 }
 
@@ -87,7 +87,7 @@ function calcular() {
   };
 
   if (!params.dataEntrada) { alert('Selecione uma data.'); return; }
-  if (!params.diasPrazo || params.diasPrazo < 1) { alert('Informe um prazo valido.'); return; }
+  if (!params.diasPrazo || params.diasPrazo < 1) { alert('Informe um prazo válido.'); return; }
 
   ultimoResultado = calcularPrazo(params);
   renderResultado(ultimoResultado);
@@ -106,7 +106,7 @@ function renderResultado(r) {
     ? r.diasContados
     : r.diasContados;
   document.getElementById('stat-dias').textContent = diasLabel;
-  const tipoLabel = r.parametros.tipoContagem === 'dias_uteis' ? 'dias uteis' : (r.parametros.tipoContagem === 'dias_corridos' ? 'dias corridos' : '');
+  const tipoLabel = r.parametros.tipoContagem === 'dias_uteis' ? 'dias úteis' : (r.parametros.tipoContagem === 'dias_corridos' ? 'dias corridos' : '');
   document.getElementById('stat-dias-sub').textContent = r.parametros.multiplicador > 1
     ? r.parametros.diasPrazo + ' x ' + r.parametros.multiplicador + ' = ' + diasLabel + ' ' + tipoLabel
     : tipoLabel;
@@ -123,11 +123,11 @@ function renderResultado(r) {
 
   // Parâmetros
   const tipoDataNomes = {
-    disponibilizacao_djen: 'Disponibilizacao no DJEN',
-    publicacao_djen: 'Publicacao no DJEN',
+    disponibilizacao_djen: 'Disponibilização no DJEN',
+    publicacao_djen: 'Publicação no DJEN',
     prazo_direto: 'Data do evento (prazo direto)',
   };
-  const tipoContagemNomes = { dias_uteis: 'Dias uteis', dias_corridos: 'Dias corridos', meses: 'Meses' };
+  const tipoContagemNomes = { dias_uteis: 'Dias úteis', dias_corridos: 'Dias corridos', meses: 'Meses' };
 
   const paramsHTML = [
     ['Tipo de data', tipoDataNomes[r.parametros.tipoData]],
@@ -135,11 +135,11 @@ function renderResultado(r) {
     ['Prazo', r.parametros.diasPrazo + ' ' + tipoContagemNomes[r.parametros.tipoContagem].toLowerCase()],
     ['Multiplicador', r.parametros.multiplicador + 'x'],
     ['Tribunal', r.parametros.tribunal.toUpperCase()],
-    ['Municipio', r.parametros.municipio],
+    ['Município', r.parametros.municipio],
   ].map(([k, v]) =>
     '<div class="param-row"><span class="param-key">' + k + '</span><span class="param-value">' + v + '</span></div>'
   ).join('');
-  document.getElementById('res-parametros').innerHTML = '<h3>Parametros utilizados</h3>' + paramsHTML;
+  document.getElementById('res-parametros').innerHTML = '<h3>Parâmetros utilizados</h3>' + paramsHTML;
 
   // Calendário como table
   const rows = r.calendario.map(d => {
@@ -155,7 +155,7 @@ function renderResultado(r) {
   }).join('');
 
   document.getElementById('res-calendario').innerHTML =
-    '<h3>Calendario detalhado</h3>' +
+    '<h3>Calendário detalhado</h3>' +
     '<table class="calendario-table">' +
     '<thead><tr><th>Data</th><th>Dia</th><th>Status</th><th>Motivo</th></tr></thead>' +
     '<tbody>' + rows + '</tbody>' +
@@ -175,7 +175,7 @@ function initConfigEvents() {
     const descricao = document.getElementById('susp-descricao').value;
     const fundamentacao = document.getElementById('susp-fundamentacao').value;
 
-    if (!inicio || !fim || !descricao) { alert('Preencha todos os campos obrigatorios.'); return; }
+    if (!inicio || !fim || !descricao) { alert('Preencha todos os campos obrigatórios.'); return; }
 
     HolidayManager.salvarSuspensaoCustom({ inicio, fim, descricao, fundamentacao, ativo: true });
     document.getElementById('susp-inicio').value = '';
@@ -211,8 +211,8 @@ function initConfigEvents() {
         if (dados.suspensoes) dados.suspensoes.forEach(s => HolidayManager.salvarSuspensaoCustom(s));
         renderFeriados();
         renderSuspensoes();
-        alert('Importacao concluida.');
-      } catch { alert('Arquivo JSON invalido.'); }
+        alert('Importação concluída.');
+      } catch { alert('Arquivo JSON inválido.'); }
     };
     reader.readAsText(file);
   });
@@ -249,7 +249,7 @@ function renderSuspensoes() {
   const lista = document.getElementById('suspensoes-lista');
 
   if (suspensoes.length === 0) {
-    lista.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">Nenhuma suspensao cadastrada.</p>';
+    lista.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">Nenhuma suspensão cadastrada.</p>';
     return;
   }
 
@@ -271,7 +271,7 @@ function removerSuspensao(index) {
 function initHistoricoEvents() {
   document.getElementById('hist-filtro').addEventListener('input', renderHistorico);
   document.getElementById('btn-limpar-historico').addEventListener('click', () => {
-    if (confirm('Limpar todo o historico?')) {
+    if (confirm('Limpar todo o histórico?')) {
       Storage.limpar();
       renderHistorico();
     }
@@ -288,7 +288,7 @@ function renderHistorico() {
   const lista = document.getElementById('historico-lista');
 
   if (historico.length === 0) {
-    lista.innerHTML = '<div class="historico-vazio">Nenhum calculo salvo.</div>';
+    lista.innerHTML = '<div class="historico-vazio">Nenhum cálculo salvo.</div>';
     return;
   }
 
@@ -296,7 +296,7 @@ function renderHistorico() {
     '<div class="historico-item" onclick="carregarHistorico(' + h.id + ')">' +
     '<div class="historico-info">' +
     '<div class="data">' + formatarDataBR(h.dataVencimento) + ' &middot; ' + h.diaSemana + '</div>' +
-    '<div class="desc">' + (h.parametros.descricao || 'Sem descricao') + '</div>' +
+    '<div class="desc">' + (h.parametros.descricao || 'Sem descrição') + '</div>' +
     '<div class="timestamp">' + new Date(h.timestamp).toLocaleString('pt-BR') + '</div>' +
     '</div>' +
     '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); removerHistorico(' + h.id + ')">Remover</button>' +
@@ -336,5 +336,5 @@ function formatarDataBR(dataStr) {
 
 function diaSemanaAbrev(dataStr) {
   const d = new Date(dataStr + 'T12:00:00');
-  return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'][d.getDay()];
+  return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][d.getDay()];
 }
