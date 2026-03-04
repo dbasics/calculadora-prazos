@@ -83,6 +83,60 @@ function initFormEvents() {
     btn.textContent = 'Salvo!';
     setTimeout(() => { btn.textContent = 'Salvar no histórico'; }, 1500);
   });
+
+  document.getElementById('btn-copiar-fundamentacao').addEventListener('click', () => {
+    if (!ultimoResultado) return;
+    const texto = gerarFundamentacao(ultimoResultado);
+    navigator.clipboard.writeText(texto).then(() => {
+      const btn = document.getElementById('btn-copiar-fundamentacao');
+      btn.textContent = 'Copiado!';
+      setTimeout(() => { btn.textContent = 'Copiar fundamentação'; }, 1500);
+    });
+  });
+}
+
+function gerarFundamentacao(r) {
+  const tipoDataNomes = {
+    disponibilizacao_djen: 'Disponibilização no DJEN',
+    publicacao_djen: 'Publicação no DJEN',
+    prazo_direto: 'Data do evento',
+  };
+  const tipoContagemNomes = {
+    dias_uteis: 'dias úteis',
+    dias_corridos: 'dias corridos',
+    meses: 'meses',
+  };
+
+  const p = r.parametros;
+  const tipoContagem = tipoContagemNomes[p.tipoContagem];
+  const prazoTotal = p.multiplicador > 1
+    ? p.diasPrazo + ' ' + tipoContagem + ' x ' + p.multiplicador + ' (prazo em dobro) = ' + r.diasContados + ' ' + tipoContagem
+    : r.diasContados + ' ' + tipoContagem;
+
+  // Feriados e suspensões no período
+  const naoContados = r.calendario.filter(d => d.status === 'nao_contado');
+  const feriados = naoContados.filter(d => !d.motivo.includes('Fim de semana') && !d.motivo.includes('Recesso'));
+  const recesso = naoContados.some(d => d.motivo.includes('Recesso'));
+
+  let texto = 'Prazo de ' + prazoTotal + ' (CPC, art. 219). ';
+  texto += tipoDataNomes[p.tipoData] + ' em ' + formatarDataBR(p.dataEntrada) + '. ';
+  texto += 'Marco inicial (dia 1): ' + formatarDataBR(r.marcoInicial) + ' (' + diaSemanaAbrev(r.marcoInicial) + '). ';
+  texto += 'Vencimento: ' + formatarDataBR(r.dataVencimento) + ' (' + r.diaSemana + '). ';
+
+  if (recesso) {
+    texto += 'Incidiu recesso forense (art. 220, CPC) no período. ';
+  }
+
+  if (feriados.length > 0) {
+    const feriadosUnicos = [...new Set(feriados.map(f => f.motivo))];
+    texto += 'Feriados no período: ' + feriadosUnicos.join('; ') + '. ';
+  }
+
+  if (feriados.length === 0 && !recesso) {
+    texto += 'Não houve suspensões ou feriados relevantes no período.';
+  }
+
+  return texto.trim();
 }
 
 function calcular() {
