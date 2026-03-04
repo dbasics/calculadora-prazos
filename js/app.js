@@ -221,7 +221,7 @@ function renderFeriados() {
     '<div class="feriado-item">' +
     '<span class="feriado-data">' + formatarDataBR(f.data) + '</span>' +
     '<span>' + f.nome + '</span>' +
-    '<span class="feriado-tipo">' + f.tipo + '</span>' +
+    '<span class="feriado-tipo" data-tipo="' + f.tipo + '">' + f.tipo + '</span>' +
     '</div>'
   ).join('');
 
