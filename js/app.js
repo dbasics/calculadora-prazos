@@ -7,15 +7,34 @@ let ultimoResultado = null;
 // === INIT ===
 document.addEventListener('DOMContentLoaded', async () => {
   await HolidayManager.init();
-
-  // Data padrão = hoje
   document.getElementById('data-entrada').value = formatarData(new Date());
 
+  initThemeToggle();
   initTabs();
   initFormEvents();
   initConfigEvents();
   initHistoricoEvents();
 });
+
+// === THEME TOGGLE ===
+function initThemeToggle() {
+  const saved = localStorage.getItem('theme') || 'dark';
+  setTheme(saved);
+
+  document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setTheme(btn.dataset.themeBtn);
+    });
+  });
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.themeBtn === theme);
+  });
+}
 
 // === TABS ===
 function initTabs() {
@@ -34,7 +53,6 @@ function initTabs() {
 
 // === FORM ===
 function initFormEvents() {
-  // Help text dinâmico
   document.getElementById('tipo-data').addEventListener('change', (e) => {
     const help = document.getElementById('tipo-data-help');
     const textos = {
@@ -45,17 +63,14 @@ function initFormEvents() {
     help.textContent = textos[e.target.value];
   });
 
-  // Calcular
   document.getElementById('btn-calcular').addEventListener('click', calcular);
 
-  // Salvar
   document.getElementById('btn-salvar').addEventListener('click', () => {
     if (!ultimoResultado) return;
     Storage.salvar(ultimoResultado);
-    document.getElementById('btn-salvar').textContent = 'Salvo!';
-    setTimeout(() => {
-      document.getElementById('btn-salvar').textContent = 'Salvar no historico';
-    }, 1500);
+    const btn = document.getElementById('btn-salvar');
+    btn.textContent = 'Salvo!';
+    setTimeout(() => { btn.textContent = 'Salvar no historico'; }, 1500);
   });
 }
 
@@ -71,32 +86,34 @@ function calcular() {
     descricao: document.getElementById('descricao').value,
   };
 
-  if (!params.dataEntrada) {
-    alert('Selecione uma data.');
-    return;
-  }
-
-  if (!params.diasPrazo || params.diasPrazo < 1) {
-    alert('Informe um prazo valido.');
-    return;
-  }
+  if (!params.dataEntrada) { alert('Selecione uma data.'); return; }
+  if (!params.diasPrazo || params.diasPrazo < 1) { alert('Informe um prazo valido.'); return; }
 
   ultimoResultado = calcularPrazo(params);
   renderResultado(ultimoResultado);
 }
 
 function renderResultado(r) {
+  // Stat cards
+  const cards = document.getElementById('stat-cards');
+  cards.classList.add('visible');
+  document.getElementById('stat-vencimento').textContent = formatarDataBR(r.dataVencimento);
+  document.getElementById('stat-dia-semana').textContent = r.diaSemana;
+  document.getElementById('stat-marco').textContent = formatarDataBR(r.marcoInicial);
+  document.getElementById('stat-marco-sub').textContent = 'Dia 1 da contagem (' + diaSemanaAbrev(r.marcoInicial) + ')';
+
+  const diasLabel = typeof r.diasContados === 'number'
+    ? r.diasContados
+    : r.diasContados;
+  document.getElementById('stat-dias').textContent = diasLabel;
+  const tipoLabel = r.parametros.tipoContagem === 'dias_uteis' ? 'dias uteis' : (r.parametros.tipoContagem === 'dias_corridos' ? 'dias corridos' : '');
+  document.getElementById('stat-dias-sub').textContent = r.parametros.multiplicador > 1
+    ? r.parametros.diasPrazo + ' x ' + r.parametros.multiplicador + ' = ' + diasLabel + ' ' + tipoLabel
+    : tipoLabel;
+
+  // Resultado container
   const container = document.getElementById('resultado');
   container.classList.add('visible');
-
-  // Data destaque
-  const dataFormatada = formatarDataBR(r.dataVencimento);
-  document.getElementById('res-data').textContent = dataFormatada;
-  document.getElementById('res-dia-semana').textContent = r.diaSemana;
-  document.getElementById('res-dias-contados').textContent =
-    typeof r.diasContados === 'number'
-      ? r.diasContados + ' dias ' + (r.parametros.tipoContagem === 'dias_uteis' ? 'uteis' : 'corridos')
-      : r.diasContados;
 
   // Etapas
   const etapasHTML = r.etapas.map(e =>
@@ -110,11 +127,7 @@ function renderResultado(r) {
     publicacao_djen: 'Publicacao no DJEN',
     prazo_direto: 'Data do evento (prazo direto)',
   };
-  const tipoContagemNomes = {
-    dias_uteis: 'Dias uteis',
-    dias_corridos: 'Dias corridos',
-    meses: 'Meses',
-  };
+  const tipoContagemNomes = { dias_uteis: 'Dias uteis', dias_corridos: 'Dias corridos', meses: 'Meses' };
 
   const paramsHTML = [
     ['Tipo de data', tipoDataNomes[r.parametros.tipoData]],
@@ -126,22 +139,30 @@ function renderResultado(r) {
   ].map(([k, v]) =>
     '<div class="param-row"><span class="param-key">' + k + '</span><span class="param-value">' + v + '</span></div>'
   ).join('');
-  document.getElementById('res-parametros').innerHTML = '<h3>Parametros do calculo</h3>' + paramsHTML;
+  document.getElementById('res-parametros').innerHTML = '<h3>Parametros utilizados</h3>' + paramsHTML;
 
-  // Calendário
-  const calHTML = r.calendario.map(d => {
+  // Calendário como table
+  const rows = r.calendario.map(d => {
     const contagem = d.contagem !== null ? (typeof d.contagem === 'number' ? 'Dia ' + d.contagem : d.contagem) : '-';
     const statusLabel = d.status === 'contado' ? contagem : (d.status === 'prorrogado' ? 'Prorrog.' : '-');
-    return '<div class="cal-dia">' +
-      '<span class="cal-data">' + formatarDataBR(d.data) + ' ' + diaSemanaAbrev(d.data) + '</span>' +
-      '<span class="cal-status ' + d.status + '">' + statusLabel + '</span>' +
-      '<span class="cal-motivo">' + d.motivo + '</span>' +
-      '</div>';
+    const badgeClass = 'badge badge-' + d.status;
+    return '<tr>' +
+      '<td class="col-data">' + formatarDataBR(d.data) + '</td>' +
+      '<td class="col-dia">' + diaSemanaAbrev(d.data) + '</td>' +
+      '<td class="col-status"><span class="' + badgeClass + '">' + statusLabel + '</span></td>' +
+      '<td class="col-motivo">' + d.motivo + '</td>' +
+      '</tr>';
   }).join('');
-  document.getElementById('res-calendario').innerHTML = '<h3>Calendario detalhado</h3>' + calHTML;
 
-  // Scroll para resultado
-  container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('res-calendario').innerHTML =
+    '<h3>Calendario detalhado</h3>' +
+    '<table class="calendario-table">' +
+    '<thead><tr><th>Data</th><th>Dia</th><th>Status</th><th>Motivo</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody>' +
+    '</table>';
+
+  // Scroll
+  cards.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // === CONFIGURAÇÃO ===
@@ -154,10 +175,7 @@ function initConfigEvents() {
     const descricao = document.getElementById('susp-descricao').value;
     const fundamentacao = document.getElementById('susp-fundamentacao').value;
 
-    if (!inicio || !fim || !descricao) {
-      alert('Preencha todos os campos obrigatorios.');
-      return;
-    }
+    if (!inicio || !fim || !descricao) { alert('Preencha todos os campos obrigatorios.'); return; }
 
     HolidayManager.salvarSuspensaoCustom({ inicio, fim, descricao, fundamentacao, ativo: true });
     document.getElementById('susp-inicio').value = '';
@@ -169,10 +187,7 @@ function initConfigEvents() {
 
   document.getElementById('btn-exportar').addEventListener('click', () => {
     const ano = parseInt(document.getElementById('config-ano').value);
-    const dados = {
-      feriados: HolidayManager.listarFeriados(ano),
-      suspensoes: HolidayManager.getSuspensoesCustom(),
-    };
+    const dados = { feriados: HolidayManager.listarFeriados(ano), suspensoes: HolidayManager.getSuspensoesCustom() };
     const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -193,15 +208,11 @@ function initConfigEvents() {
     reader.onload = (ev) => {
       try {
         const dados = JSON.parse(ev.target.result);
-        if (dados.suspensoes) {
-          dados.suspensoes.forEach(s => HolidayManager.salvarSuspensaoCustom(s));
-        }
+        if (dados.suspensoes) dados.suspensoes.forEach(s => HolidayManager.salvarSuspensaoCustom(s));
         renderFeriados();
         renderSuspensoes();
         alert('Importacao concluida.');
-      } catch {
-        alert('Arquivo JSON invalido.');
-      }
+      } catch { alert('Arquivo JSON invalido.'); }
     };
     reader.readAsText(file);
   });
@@ -221,11 +232,16 @@ function renderFeriados() {
     '<div class="feriado-item">' +
     '<span class="feriado-data">' + formatarDataBR(f.data) + '</span>' +
     '<span>' + f.nome + '</span>' +
-    '<span class="feriado-tipo" data-tipo="' + f.tipo + '">' + f.tipo + '</span>' +
+    '<span class="feriado-tipo badge badge-' + badgeTipo(f.tipo) + '">' + f.tipo + '</span>' +
     '</div>'
   ).join('');
 
   renderSuspensoes();
+}
+
+function badgeTipo(tipo) {
+  const map = { nacional: 'contado', movel: 'prorrogado', estadual: 'contado', municipal: 'nao_contado' };
+  return map[tipo] || 'nao_contado';
 }
 
 function renderSuspensoes() {
@@ -266,8 +282,7 @@ function renderHistorico() {
   const filtro = document.getElementById('hist-filtro').value.toLowerCase();
   const historico = Storage.getHistorico().filter(h => {
     if (!filtro) return true;
-    const texto = (h.parametros.descricao + ' ' + h.dataVencimento + ' ' + h.parametros.dataEntrada).toLowerCase();
-    return texto.includes(filtro);
+    return (h.parametros.descricao + ' ' + h.dataVencimento + ' ' + h.parametros.dataEntrada).toLowerCase().includes(filtro);
   });
 
   const lista = document.getElementById('historico-lista');
@@ -280,9 +295,9 @@ function renderHistorico() {
   lista.innerHTML = historico.map(h =>
     '<div class="historico-item" onclick="carregarHistorico(' + h.id + ')">' +
     '<div class="historico-info">' +
-    '<div class="data">Vencimento: ' + formatarDataBR(h.dataVencimento) + ' (' + h.diaSemana + ')</div>' +
+    '<div class="data">' + formatarDataBR(h.dataVencimento) + ' &middot; ' + h.diaSemana + '</div>' +
     '<div class="desc">' + (h.parametros.descricao || 'Sem descricao') + '</div>' +
-    '<div class="timestamp">Calculado em: ' + new Date(h.timestamp).toLocaleString('pt-BR') + '</div>' +
+    '<div class="timestamp">' + new Date(h.timestamp).toLocaleString('pt-BR') + '</div>' +
     '</div>' +
     '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); removerHistorico(' + h.id + ')">Remover</button>' +
     '</div>'
@@ -290,11 +305,9 @@ function renderHistorico() {
 }
 
 function carregarHistorico(id) {
-  const historico = Storage.getHistorico();
-  const item = historico.find(h => h.id === id);
+  const item = Storage.getHistorico().find(h => h.id === id);
   if (!item) return;
 
-  // Preencher form
   document.getElementById('tipo-data').value = item.parametros.tipoData;
   document.getElementById('data-entrada').value = item.parametros.dataEntrada;
   document.getElementById('dias-prazo').value = item.parametros.diasPrazo;
@@ -302,12 +315,10 @@ function carregarHistorico(id) {
   document.getElementById('multiplicador').value = item.parametros.multiplicador;
   document.getElementById('descricao').value = item.parametros.descricao || '';
 
-  // Ir para aba de cálculo e recalcular
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelector('[data-view="calculo"]').classList.add('active');
   document.getElementById('view-calculo').classList.add('active');
-
   calcular();
 }
 

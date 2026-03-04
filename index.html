@@ -1,17 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculadora de Prazos Processuais</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="app">
     <header>
-      <div>
-        <h1>Calculadora de Prazos Processuais</h1>
-        <div class="subtitle">CPC/2015 - TJES</div>
+      <div class="header-left">
+        <div class="header-breadcrumb">Prazos Processuais <span>&rsaquo;</span> CPC/2015 <span>&rsaquo;</span> TJES</div>
+        <h1>Calculadora de Prazos</h1>
+      </div>
+      <div class="theme-toggle">
+        <button data-theme-btn="light"><span class="icon">&#9788;</span> Light</button>
+        <button data-theme-btn="dark" class="active"><span class="icon">&#9789;</span> Dark</button>
       </div>
     </header>
 
@@ -23,85 +28,100 @@
 
     <!-- TELA: CÁLCULO -->
     <div id="view-calculo" class="view active">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="tipo-data">Tipo de data de entrada</label>
-          <select id="tipo-data">
-            <option value="disponibilizacao_djen">Disponibilizacao no DJEN</option>
-            <option value="publicacao_djen">Publicacao no DJEN</option>
-            <option value="prazo_direto">Data do evento (prazo direto)</option>
-          </select>
-          <span class="help" id="tipo-data-help">A data sera ajustada conforme as regras do DJEN (2 saltos de dia util)</span>
+      <!-- Stat cards (aparecem após cálculo) -->
+      <div class="stat-cards" id="stat-cards">
+        <div class="stat-card">
+          <div class="stat-label">Vencimento</div>
+          <div class="stat-value" id="stat-vencimento">--</div>
+          <div class="stat-sub" id="stat-dia-semana">--</div>
         </div>
-
-        <div class="form-group">
-          <label for="data-entrada">Data</label>
-          <input type="date" id="data-entrada">
+        <div class="stat-card">
+          <div class="stat-label">Marco inicial</div>
+          <div class="stat-value" id="stat-marco">--</div>
+          <div class="stat-sub" id="stat-marco-sub">Dia 1 da contagem</div>
         </div>
-
-        <div class="form-group">
-          <label for="dias-prazo">Prazo</label>
-          <input type="number" id="dias-prazo" value="15" min="1">
-        </div>
-
-        <div class="form-group">
-          <label for="tipo-contagem">Tipo de contagem</label>
-          <select id="tipo-contagem">
-            <option value="dias_uteis">Dias uteis (CPC, art. 219)</option>
-            <option value="dias_corridos">Dias corridos</option>
-            <option value="meses">Meses (art. 132, CC)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="tribunal">Tribunal</label>
-          <select id="tribunal">
-            <option value="tjes">TJES - Tribunal de Justica do ES</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="municipio">Municipio da sede do juizo</label>
-          <select id="municipio">
-            <option value="vitoria-es">Vitoria/ES</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="multiplicador">Multiplicador de prazo</label>
-          <select id="multiplicador">
-            <option value="1">1x (padrao)</option>
-            <option value="2">2x (Fazenda Publica / MP / Defensoria)</option>
-            <option value="3">3x</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="descricao">Descricao (opcional)</label>
-          <input type="text" id="descricao" placeholder="Ex: Recurso processo 0001234-56.2026">
+        <div class="stat-card">
+          <div class="stat-label">Dias contados</div>
+          <div class="stat-value" id="stat-dias">--</div>
+          <div class="stat-sub" id="stat-dias-sub">--</div>
         </div>
       </div>
 
-      <div class="btn-group">
-        <button class="btn btn-primary" id="btn-calcular">Calcular prazo</button>
-      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Parametros do calculo</div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="tipo-data">Tipo de data de entrada</label>
+            <select id="tipo-data">
+              <option value="disponibilizacao_djen">Disponibilizacao no DJEN</option>
+              <option value="publicacao_djen">Publicacao no DJEN</option>
+              <option value="prazo_direto">Data do evento (prazo direto)</option>
+            </select>
+            <span class="help" id="tipo-data-help">A data sera ajustada conforme as regras do DJEN (2 saltos de dia util)</span>
+          </div>
 
-      <div id="resultado" class="resultado-container" style="margin-top: 28px;">
-        <div class="resultado-destaque">
-          <div class="label-vencimento">Vencimento do prazo</div>
-          <div class="data-vencimento" id="res-data"></div>
-          <div class="dia-semana" id="res-dia-semana"></div>
-          <div class="dias-contados" id="res-dias-contados"></div>
+          <div class="form-group">
+            <label for="data-entrada">Data</label>
+            <input type="date" id="data-entrada">
+          </div>
+
+          <div class="form-group">
+            <label for="dias-prazo">Prazo</label>
+            <input type="number" id="dias-prazo" value="15" min="1">
+          </div>
+
+          <div class="form-group">
+            <label for="tipo-contagem">Tipo de contagem</label>
+            <select id="tipo-contagem">
+              <option value="dias_uteis">Dias uteis (CPC, art. 219)</option>
+              <option value="dias_corridos">Dias corridos</option>
+              <option value="meses">Meses (art. 132, CC)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="tribunal">Tribunal</label>
+            <select id="tribunal">
+              <option value="tjes">TJES - Tribunal de Justica do ES</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="municipio">Municipio da sede do juizo</label>
+            <select id="municipio">
+              <option value="vitoria-es">Vitoria/ES</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="multiplicador">Multiplicador de prazo</label>
+            <select id="multiplicador">
+              <option value="1">1x (padrao)</option>
+              <option value="2">2x (Fazenda Publica / MP / Defensoria)</option>
+              <option value="3">3x</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="descricao">Descricao (opcional)</label>
+            <input type="text" id="descricao" placeholder="Ex: Recurso processo 0001234-56.2026">
+          </div>
         </div>
 
-        <div class="btn-group" style="margin-bottom: 16px;">
+        <button class="btn btn-primary btn-full" id="btn-calcular">Calcular prazo</button>
+      </div>
+
+      <div id="resultado" class="resultado-container">
+        <div class="btn-group" style="margin: 16px 0;">
           <button class="btn btn-secondary btn-sm" id="btn-salvar">Salvar no historico</button>
           <button class="btn btn-secondary btn-sm" onclick="window.print()">Imprimir</button>
         </div>
 
         <div id="res-etapas" class="etapas"></div>
-        <div id="res-parametros" class="parametros"></div>
         <div id="res-calendario" class="calendario"></div>
+        <div id="res-parametros" class="parametros"></div>
       </div>
     </div>
 
@@ -154,13 +174,16 @@
 
     <!-- TELA: HISTÓRICO -->
     <div id="view-historico" class="view">
-      <div class="form-grid" style="margin-bottom: 16px;">
-        <div class="form-group">
-          <label for="hist-filtro">Filtrar</label>
-          <input type="text" id="hist-filtro" placeholder="Buscar por descricao ou data...">
-        </div>
-        <div class="form-group" style="justify-content: flex-end;">
-          <button class="btn btn-danger btn-sm" id="btn-limpar-historico">Limpar historico</button>
+      <div class="card" style="margin-bottom: 12px;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="hist-filtro">Filtrar</label>
+            <input type="text" id="hist-filtro" placeholder="Buscar por descricao ou data...">
+          </div>
+          <div class="form-group" style="justify-content: flex-end;">
+            <label>&nbsp;</label>
+            <button class="btn btn-danger btn-sm" id="btn-limpar-historico">Limpar historico</button>
+          </div>
         </div>
       </div>
       <div id="historico-lista"></div>
