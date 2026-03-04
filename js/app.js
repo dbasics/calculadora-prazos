@@ -18,19 +18,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // === THEME TOGGLE ===
 function initThemeToggle() {
-  const saved = localStorage.getItem('theme') || 'dark';
-  setTheme(saved);
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    setTheme(saved);
+  } else {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(prefersDark ? 'dark' : 'light');
+  }
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+      setTheme(e.matches ? 'dark' : 'light');
+    }
+  });
 
   document.querySelectorAll('[data-theme-btn]').forEach(btn => {
     btn.addEventListener('click', () => {
-      setTheme(btn.dataset.themeBtn);
+      setTheme(btn.dataset.themeBtn, true);
     });
   });
 }
 
-function setTheme(theme) {
+function setTheme(theme, manual) {
   document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
+  if (manual) localStorage.setItem('theme', theme);
   document.querySelectorAll('[data-theme-btn]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.themeBtn === theme);
   });
